@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --saffron: #FF9933;
+  --maroon: #800020;
+  --gold: #FFD700;
+  --cream: #F5F5DC;
+  --dark-red: #5D001E;
+  --light-saffron: #FFB366;
+}
+
+.font-traditional {
+  font-family: 'Crimson Text', serif;
+}
+
+.font-modern {
+  font-family: 'Inter', sans-serif;
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.gradient-saffron {
+  background: linear-gradient(135deg, #FF9933, #FF7700);
+}
+
+.gradient-maroon {
+  background: linear-gradient(135deg, #800020, #5D001E);
+}
+
+.shadow-traditional {
+  box-shadow: 0 8px 32px rgba(128, 0, 32, 0.15);
+}
+
+.border-traditional {
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+}
+
+.text-shadow-gold {
+  text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(128, 0, 32, 0.2);
+}
