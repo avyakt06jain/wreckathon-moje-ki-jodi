@@ -8,8 +8,8 @@ const Header: React.FC = () => {
             <div className="relative"><a href="/#"  ><img src='/src/images/logo.png' alt='Dil' style={{ maxHeight: '60px', width: 'auto' }} /></a>
             </div>
             <div>
-              <a href="/#" className="font-traditional text-3xl font-bold text-maroon" >Moje Ki Jodi</a>
-              <a href="/#" className="font-modern text-sm text-gray-600"><p>India's #1 Sock Matrimonial</p></a>
+              <a href="/home" className="font-traditional text-3xl font-bold text-maroon" >Moje Ki Jodi</a>
+              <a href="/home" className="font-modern text-sm text-gray-600"><p>India's #1 Sock Matrimonial</p></a>
             </div>
           </div>
           <nav className="hidden md:flex items-center space-x-6">

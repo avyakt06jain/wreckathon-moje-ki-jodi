@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import EntryPage from './pages/EntryPage';
 import Homepage from './pages/Homepage';
 import Registration from './pages/Registration';
 import Matchmaking from './pages/Matchmaking';
@@ -10,7 +11,8 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-cream-50 to-yellow-50">
         <Routes>
-          <Route path="/" element={<Homepage />} />
+          <Route path="/" element={<EntryPage />} />
+          <Route path="/home" element={<Homepage />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/matchmaking" element={<Matchmaking />} />
         </Routes>

@@ -78,7 +78,7 @@ const Matchmaking: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6">
           <button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="flex items-center text-maroon hover:text-saffron font-semibold"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
