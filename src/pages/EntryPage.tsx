@@ -4,37 +4,114 @@ import { Shield, RefreshCw } from 'lucide-react';
 
 const EntryPage: React.FC = () => {
   const navigate = useNavigate();
-  const [captchaText, setCaptchaText] = useState('');
-  const [userInput, setUserInput] = useState('');
+  const [currentChallenge, setCurrentChallenge] = useState<any>(null);
+  const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set());
+  const [resultMessage, setResultMessage] = useState('');
+  const [resultType, setResultType] = useState<'success' | 'error' | ''>('');
   const [isVerified, setIsVerified] = useState(false);
-  const [error, setError] = useState('');
 
-  // Generate random captcha text
-  const generateCaptcha = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  const captchaChallenges = [
+    {
+      prompt: "a well-settled, 'government job' type sock.",
+      images: [
+        { src: '/src/images/govt-job-sock.png', isCorrect: true },
+        { src: '/src/images/stable-looking-sock.png', isCorrect: true },
+        { src: '/src/images/respectable-black-sock.png', isCorrect: true },
+        { src: '/src/images/flashy-unemployed-sock.png', isCorrect: false },
+        { src: '/src/images/sock-with-hole.png', isCorrect: false },
+        { src: '/src/images/startup-hustle-sock.png', isCorrect: false },
+        { src: '/src/images/mismatched-pair.png', isCorrect: false },
+        { src: '/src/images/faded-glory-sock.png', isCorrect: false },
+        { src: '/src/images/lazy-unfolded-sock.png', isCorrect: false },
+      ]
+    },
+    {
+      prompt: "a homely, 'sanskari' sock.",
+      images: [
+        { src: '/src/images/homely-folded-sock.png', isCorrect: true },
+        { src: '/src/images/simple-and-clean-sock.png', isCorrect: true },
+        { src: '/src/images/decent-pattern-sock.png', isCorrect: true },
+        { src: '/src/images/too-modern-sock.png', isCorrect: false },
+        { src: '/src/images/dirty-sock.png', isCorrect: false },
+        { src: '/src/images/loud-party-sock.png', isCorrect: false },
+        { src: '/src/images/unfolded-messy-sock.png', isCorrect: false },
+        { src: '/src/images/see-through-sock.png', isCorrect: false },
+        { src: '/src/images/torn-stylish-sock.png', isCorrect: false },
+      ]
+    },
+    {
+      prompt: "a sock from a good, reputed family (gotra).",
+      images: [
+        { src: '/src/images/nike-gotra-sock.png', isCorrect: true },
+        { src: '/src/images/adidas-family-sock.png', isCorrect: true },
+        { src: '/src/images/puma-clan-sock.png', isCorrect: true },
+        { src: '/src/images/unknown-origin-sock.png', isCorrect: false },
+        { src: '/src/images/local-market-sock.png', isCorrect: false },
+        { src: '/src/images/bazaar-sock.png', isCorrect: false },
+        { src: '/src/images/faded-brand-sock.png', isCorrect: false },
+        { src: '/src/images/suspicious-logo-sock.png', isCorrect: false },
+        { src: '/src/images/plain-white-sock.png', isCorrect: false },
+      ]
     }
-    setCaptchaText(result);
-    setUserInput('');
-    setError('');
+  ];
+
+  const generateCaptcha = () => {
+    setSelectedImages(new Set());
+    setResultMessage('');
+    setResultType('');
+    
+    const randomChallenge = captchaChallenges[Math.floor(Math.random() * captchaChallenges.length)];
+    const shuffledImages = [...randomChallenge.images].sort(() => Math.random() - 0.5);
+    
+    setCurrentChallenge({
+      ...randomChallenge,
+      images: shuffledImages
+    });
   };
 
   useEffect(() => {
     generateCaptcha();
   }, []);
 
-  const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (userInput === captchaText) {
+  const handleImageClick = (index: number) => {
+    const newSelected = new Set(selectedImages);
+    if (newSelected.has(index)) {
+      newSelected.delete(index);
+    } else {
+      newSelected.add(index);
+    }
+    setSelectedImages(newSelected);
+  };
+
+  const verifySelection = () => {
+    if (!currentChallenge) return;
+
+    let correctSelections = 0;
+    let incorrectSelections = 0;
+
+    currentChallenge.images.forEach((img: any, index: number) => {
+      const isSelected = selectedImages.has(index);
+      const shouldBeSelected = img.isCorrect;
+
+      if (isSelected && shouldBeSelected) correctSelections++;
+      if (isSelected && !shouldBeSelected) incorrectSelections++;
+    });
+
+    const totalCorrect = currentChallenge.images.filter((img: any) => img.isCorrect).length;
+
+    if (incorrectSelections === 0 && correctSelections === totalCorrect) {
+      setResultMessage('✅ Success! You are a responsible human.');
+      setResultType('success');
       setIsVerified(true);
       setTimeout(() => {
-        navigate('/');
-      }, 1500);
+        navigate('/home');
+      }, 2000);
     } else {
-      setError('Captcha verification failed. Please try again.');
-      generateCaptcha();
+      setResultMessage('❌ Fail! Are you a robot... or just bad at laundry?');
+      setResultType('error');
+      setTimeout(() => {
+        generateCaptcha();
+      }, 2000);
     }
   };
 
@@ -58,128 +135,93 @@ const EntryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-cream to-yellow-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
+      <div className="max-w-lg w-full">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-maroon to-dark-red rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="w-8 h-8 text-gold" />
+            <img src="/src/images/logo.png" alt="Logo" className="w-10 h-10" />
           </div>
           <h1 className="font-traditional text-4xl font-bold text-maroon mb-2">
-            Welcome to Moje Ki Jodi
+            Are You a Responsible Adult?
           </h1>
           <p className="font-modern text-gray-600">
-            Please verify you're human to continue
+            Complete this verification to enter Moje Ki Jodi
           </p>
         </div>
 
-        {/* Captcha Form */}
-        <div className="bg-white rounded-lg shadow-traditional p-8 border-traditional">
-          <form onSubmit={handleVerify} className="space-y-6">
-            {/* Captcha Display */}
-            <div className="text-center">
-              <label className="block font-traditional text-lg font-semibold text-maroon mb-4">
-                Security Verification
-              </label>
-              
-              {/* Captcha Canvas */}
-              <div className="bg-gradient-to-r from-gray-100 to-gray-200 p-6 rounded-lg border-2 border-gold mb-4 relative">
-                <div 
-                  className="captcha-display font-mono text-3xl font-bold text-maroon tracking-wider select-none"
-                  style={{
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                    transform: 'skew(-5deg)',
-                    letterSpacing: '8px'
-                  }}
-                >
-                  {captchaText.split('').map((char, index) => (
-                    <span 
-                      key={index}
-                      style={{
-                        color: `hsl(${Math.random() * 60 + 320}, 70%, 40%)`,
-                        transform: `rotate(${Math.random() * 20 - 10}deg)`,
-                        display: 'inline-block',
-                        margin: '0 2px'
-                      }}
-                    >
-                      {char}
-                    </span>
-                  ))}
-                </div>
-                
-                {/* Noise lines for security */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute bg-gray-400 opacity-30"
-                      style={{
-                        width: '2px',
-                        height: '100%',
-                        left: `${Math.random() * 100}%`,
-                        transform: `rotate(${Math.random() * 30 - 15}deg)`
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={generateCaptcha}
-                className="flex items-center justify-center mx-auto text-maroon hover:text-saffron font-semibold text-sm mb-4"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Generate New Captcha
-              </button>
-            </div>
-
-            {/* Input Field */}
-            <div>
-              <label className="block font-traditional text-lg font-semibold text-maroon mb-2">
-                Enter the text above *
-              </label>
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type the captcha text here"
-                className="w-full p-3 border-2 border-gold rounded-lg focus:outline-none focus:border-saffron font-modern text-center text-lg tracking-wider"
-                required
-                autoComplete="off"
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3">
-                <p className="font-modern text-red-600 text-sm text-center">{error}</p>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full gradient-saffron hover-lift py-3 rounded-lg text-white font-semibold text-lg shadow-traditional border-2 border-gold"
-            >
-              <Shield className="inline-block w-5 h-5 mr-2" />
-              Verify & Enter
-            </button>
-          </form>
-
-          {/* Security Notice */}
-          <div className="mt-6 text-center">
-            <p className="font-modern text-xs text-gray-500">
-              This verification helps us protect our community from automated bots and ensures 
-              genuine sock profiles only.
+        {/* Captcha Container */}
+        <div className="bg-white rounded-lg shadow-traditional p-8 border-4 border-gold">
+          {/* Captcha Prompt */}
+          <div className="mb-6">
+            <p className="font-traditional text-lg font-semibold text-maroon mb-4 leading-relaxed">
+              {currentChallenge ? `To prove you are human, please select all images with ${currentChallenge.prompt}` : 'Loading...'}
             </p>
           </div>
+
+          {/* Image Grid */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {currentChallenge?.images.map((imgData: any, index: number) => (
+              <div
+                key={index}
+                onClick={() => handleImageClick(index)}
+                className={`
+                  w-24 h-24 bg-gray-200 rounded-lg cursor-pointer transition-all duration-200 
+                  border-3 hover:scale-105 overflow-hidden
+                  ${selectedImages.has(index) 
+                    ? 'border-gold shadow-lg shadow-gold/50' 
+                    : 'border-gray-300 hover:border-saffron'
+                  }
+                `}
+              >
+                <img 
+                  src={imgData.src} 
+                  alt={`Captcha option ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to placeholder if image doesn't exist
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCA1MEg4ME01MCAyMFY4MCIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2Zz4K';
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Verify Button */}
+          <div className="text-center mb-4">
+            <button
+              onClick={verifySelection}
+              className="gradient-saffron hover-lift px-8 py-3 rounded-lg text-white font-semibold text-lg shadow-traditional border-2 border-gold"
+            >
+              <Shield className="inline-block w-5 h-5 mr-2" />
+              Verify
+            </button>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="text-center mb-4">
+            <button
+              onClick={generateCaptcha}
+              className="flex items-center justify-center mx-auto text-maroon hover:text-saffron font-semibold text-sm"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Generate New Challenge
+            </button>
+          </div>
+
+          {/* Result Message */}
+          {resultMessage && (
+            <div className={`text-center font-semibold ${
+              resultType === 'success' ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {resultMessage}
+            </div>
+          )}
         </div>
 
         {/* Footer Note */}
         <div className="text-center mt-8">
           <p className="font-modern text-sm text-gray-600">
-            Having trouble? Contact our support team at 
-            <span className="text-maroon font-semibold"> help@mojekijodi.com</span>
+            This verification helps us ensure only genuine sock parents join our community.
           </p>
         </div>
       </div>
